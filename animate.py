@@ -16,9 +16,17 @@ from mayavi.core.ui.mayavi_scene import MayaviScene
 from core import StructureVisualizer
 
 def draw_traj(traj: list[Atoms], figure=None, mlab=mlab) -> Animator:
-    # pts, cell = draw(traj[0], figure, mlab)
+    '''
+    Handy function to draw a trajectory in Mayavi.
+
+    traj: the trajectory
+    figure: mayavi figure to draw
+    mlab: mlab module to draw
+    '''
+    # draw the first image of the trajectory
     sv = StructureVisualizer(traj[0], copy=True)
     sv.draw(figure, mlab)
+    # create the animation function
     @mlab.animate(delay=30)
     def anim():
         index = 0
@@ -27,21 +35,27 @@ def draw_traj(traj: list[Atoms], figure=None, mlab=mlab) -> Animator:
             sv.update_positions(traj[index].positions, rebuild_pairs=True)
             sv.update_scene()
             yield
-    a = anim()
+    a = anim() # animate
     return a
 
 class TrajectoryAnimator(HasTraits):
-    scene = Instance(MlabSceneModel, ())
-    timestep = Range(1, 200, value = 30)
-    idx_min = Int(0)
-    idx_max = Int()
-    index = Range(low='idx_min', high='idx_max', value=0)
+    '''
+    The Traits class that provides more advanced control over the animation of trajectory.
+    '''
+    scene = Instance(MlabSceneModel, ())                  # the Mayavi scene model that offers 3D visualization
+    timestep = Range(1, 200, value = 30)                  # the number of image to skip between each timeframe
+    idx_min = Int(0)                                      # the minimum image index
+    idx_max = Int()                                       # the maximum image index
+    index = Range(low='idx_min', high='idx_max', value=0) # image index
     play = Button('>')
     stop = Button('||')
     goto_first = Button('<<')
     goto_last = Button('>>')
 
     def __init__(self, traj: list[Atoms]) -> None:
+        '''
+        traj: the trajectory
+        '''
         super().__init__()
         self.traj = traj
         self.idx_max = len(self.traj) - 1
@@ -52,6 +66,12 @@ class TrajectoryAnimator(HasTraits):
         self.animator = None
 
     def draw(self, figure=None, mlab=None) -> None:
+        '''
+        Draw the first image of trajectory in Mayavi,
+
+        figure: mayavi figure to draw
+        mlab: mlab module to draw
+        '''
         if figure is None:
             figure = self.figure
         if mlab is None:
@@ -60,7 +80,11 @@ class TrajectoryAnimator(HasTraits):
 
     @mlab.animate(delay=30, ui=False)
     def animate(self):
+        '''
+        The animation function,
+        '''
         while True:
+            # update the image index
             self.index = (self.index + self.timestep) % len(self.traj)
             yield
 
@@ -68,10 +92,8 @@ class TrajectoryAnimator(HasTraits):
     def on_index_changed(self, event):
         if self.figure.scene is None:
             return
-        # self.figure.scene.disable_render = True
         self.sv.update_positions(self.traj[self.index].positions, rebuild_pairs=True)
         self.sv.update_scene()
-        # self.figure.scene.disable_render = False
 
     @observe('play')
     def on_play_clicked(self, event):
@@ -99,6 +121,11 @@ class TrajectoryAnimator(HasTraits):
                 )
 
 def draw_traj_adv(traj: list[Atoms]) -> TrajectoryAnimator:
+    '''
+    Handy function to draw the trajectory with advanced controls
+    
+    traj: the trajectory
+    '''
     animator = TrajectoryAnimator(traj)
     animator.draw()
     animator.configure_traits()
