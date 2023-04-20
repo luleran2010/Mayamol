@@ -4,26 +4,31 @@ from ase.io import read
 from ase.data import covalent_radii as radii, atomic_numbers as numbers
 from ase.data.colors import jmol_colors as colors
 from mayavi import mlab
+import argparse
 
-from traits.api import HasTraits, Int, Range, Instance, Button, Enum, observe
-from traitsui.api import View, Item, HGroup, ButtonEditor, RangeEditor
+from traits.api import HasTraits, Int, Range, Instance, Button, observe
+from traitsui.api import View, Item, HGroup
 from tvtk.pyface.scene_editor import SceneEditor
 from mayavi.tools.mlab_scene_model import MlabSceneModel
+from mayavi.tools.animator import Animator
 from mayavi.core.ui.mayavi_scene import MayaviScene
 
-from core import draw
+from core import StructureVisualizer
 
-def draw_traj(traj: list[Atoms], figure=None, mlab=mlab):
-    pts, cell = draw(traj[0], figure, mlab)
-    @mlab.animate(delay=50)
+def draw_traj(traj: list[Atoms], figure=None, mlab=mlab) -> Animator:
+    # pts, cell = draw(traj[0], figure, mlab)
+    sv = StructureVisualizer(traj[0], copy=True)
+    sv.draw(figure, mlab)
+    @mlab.animate(delay=30)
     def anim():
         index = 0
         while True:
             index = (index + 1) % len(traj)
-            pos = traj[index].positions
-            pts.mlab_source.trait_set(x=pos[:,0], y=pos[:,1], z = pos[:,2])
+            sv.update_positions(traj[index].positions, rebuild_pairs=True)
+            sv.update_scene()
             yield
     a = anim()
+    return a
 
 class TrajectoryAnimator(HasTraits):
     scene = Instance(MlabSceneModel, ())
@@ -39,11 +44,19 @@ class TrajectoryAnimator(HasTraits):
     def __init__(self, traj: list[Atoms]) -> None:
         super().__init__()
         self.traj = traj
-        self.pts, self.cell = draw(traj[0], mlab=self.scene.mlab)
-
         self.idx_max = len(self.traj) - 1
+        self.sv = StructureVisualizer(traj[0], copy=True)
 
+        self.mlab = self.scene.mlab
+        self.figure = self.scene.mlab.gcf()
         self.animator = None
+
+    def draw(self, figure=None, mlab=None) -> None:
+        if figure is None:
+            figure = self.figure
+        if mlab is None:
+            mlab = self.mlab
+        self.sv.draw(mlab=self.mlab)
 
     @mlab.animate(delay=30, ui=False)
     def animate(self):
@@ -53,15 +66,19 @@ class TrajectoryAnimator(HasTraits):
 
     @observe('index')
     def on_index_changed(self, event):
-        pos = self.traj[self.index].positions
-        self.pts.mlab_source.trait_set(x=pos[:,0], y=pos[:,1], z = pos[:,2])
+        if self.figure.scene is None:
+            return
+        # self.figure.scene.disable_render = True
+        self.sv.update_positions(self.traj[self.index].positions, rebuild_pairs=True)
+        self.sv.update_scene()
+        # self.figure.scene.disable_render = False
 
     @observe('play')
     def on_play_clicked(self, event):
         if self.animator is None:
             self.animator = self.animate()
         else:
-            self.animator.timer.Start(50)
+            self.animator.timer.Start(30)
     
     @observe('stop')
     def on_stop_clicked(self, event):
@@ -81,7 +98,15 @@ class TrajectoryAnimator(HasTraits):
                 title='Animator'
                 )
 
-def draw_traj_adv(traj: list[Atoms]):
+def draw_traj_adv(traj: list[Atoms]) -> TrajectoryAnimator:
     animator = TrajectoryAnimator(traj)
+    animator.draw()
     animator.configure_traits()
     return animator
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Animate the trajectory file')
+    parser.add_argument('traj', 'the trajector file')
+    args = parser.parse_args()
+    traj = read(args.traj, index=':')
+    a = draw_traj_adv(traj)
