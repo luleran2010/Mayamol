@@ -5,6 +5,7 @@ from ase.neighborlist import build_neighbor_list
 from ase.data import covalent_radii as radii, atomic_numbers as numbers
 from ase.data.colors import jmol_colors as colors
 from mayavi import mlab
+import argparse
 
 from traits.api import HasTraits, Int, Range, Instance, Button, Enum, observe
 from traitsui.api import View, Item, HGroup, ButtonEditor, RangeEditor
@@ -165,8 +166,9 @@ def draw(atoms: Atoms, copy=False, figure=None, mlab=mlab) -> StructureVisualize
     return sv
 
 if __name__ == '__main__':
-    atoms = read(r'C:\Users\llu22\OneDrive - Oulun yliopisto\Documents\phd\Mayamol\test\c2db-6222.xyz')
+    parser = argparse.ArgumentParser(description='Animate the trajectory file')
+    parser.add_argument('atoms', 'the structure file')
+    args = parser.parse_args()
+    atoms = read(parser.atoms)
     sv = draw(atoms)
-    # sv.update_positions(atoms.positions, rebuild_pairs=True)
-    # sv.update_scene()
     mlab.show()
