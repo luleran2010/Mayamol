@@ -13,7 +13,7 @@ from mayavi.tools.mlab_scene_model import MlabSceneModel
 from mayavi.tools.animator import Animator
 from mayavi.core.ui.mayavi_scene import MayaviScene
 
-from core import StructureVisualizer
+from Mayamol.core import StructureVisualizer
 
 def draw_traj(traj: list[Atoms], figure=None, mlab=mlab) -> Animator:
     '''
@@ -133,7 +133,7 @@ def draw_traj_adv(traj: list[Atoms]) -> TrajectoryAnimator:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Animate the trajectory file')
-    parser.add_argument('traj', 'the trajector file')
+    parser.add_argument('traj', help='the trajector file')
     args = parser.parse_args()
     traj = read(args.traj, index=':')
     a = draw_traj_adv(traj)

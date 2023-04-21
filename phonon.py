@@ -17,7 +17,7 @@ from matplotlib.backend_bases import PickEvent
 from matplotlib.axes import Axes
 import addcopyfighandler
 
-from core import StructureVisualizer
+from Mayamol.core import StructureVisualizer
 
 class DisplacementVisualizer(HasTraits):
     '''
@@ -245,8 +245,8 @@ def draw_phonons(atoms, bands, mlab_figure=None, mlab=None, plt_ax=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Phonon dispersion & displacement visualizer')
-    parser.add_argument('structure', 'the structure file')
-    parser.add_argument('bands', 'the Phonopy-generated bands.h5 file')
+    parser.add_argument('structure', help='the structure file')
+    parser.add_argument('bands', help='the Phonopy-generated bands.h5 file')
     args = parser.parse_args()
     atoms = read(args.structure)
     bands = read_bands(args.bands)

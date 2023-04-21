@@ -167,7 +167,7 @@ def draw(atoms: Atoms, copy=False, figure=None, mlab=mlab) -> StructureVisualize
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Animate the trajectory file')
-    parser.add_argument('atoms', 'the structure file')
+    parser.add_argument('atoms', help='the structure file')
     args = parser.parse_args()
     atoms = read(parser.atoms)
     sv = draw(atoms)
