@@ -133,7 +133,7 @@ class StructureVisualizer:
         delta = self.get_bond_vectors()
         if disable_render and self.figure.scene is not None:
             self.figure.scene.disable_render = True
-        self.points.mlab_source.trait_set(**dict(zip(['x', 'y', 'z'], self.atoms.positions[self.pfirst,:].T)))
+        self.points.mlab_source.trait_set(**dict(zip(['x', 'y', 'z'], self.atoms.positions.T)))
         self.update_bonds(**dict(zip(['x', 'y', 'z'], self.atoms.positions[self.pfirst,:].T)),
                           **dict(zip(['u', 'v', 'w'], delta.T)))
         if disable_render:

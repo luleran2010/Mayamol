@@ -160,7 +160,7 @@ def plot_bands(bands, ax: Axes=None) -> None:
 
     ax.plot(dist, freq, picker=True, pickradius=5) # the dispersion
     ax.set_xticks(ticks, tickl) # ticks at special points
-    ax.set_ylabel('Energy/eV')
+    ax.set_ylabel('Frequency/THz')
     ax.set_xlim(np.min(distance), np.max(distance))
     min_freq, max_freq = np.min(frequency), np.max(frequency)
     ax.set_ylim(min_freq, max_freq)
