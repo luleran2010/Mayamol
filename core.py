@@ -98,7 +98,7 @@ class StructureVisualizer:
         # draw the bonds
         delta = self.get_bond_vectors()
         self.bonds = self.mlab.quiver3d(*self.atoms.positions[self.pfirst,:].T, *delta.T,
-                                   mode='2ddash', line_width=10, scale_factor=1, color=(1,1,1),
+                                   mode='cylinder', line_width=2, scalars=np.ones(len(self.pfirst))*2, scale_mode='scalar', scale_factor=1, color=(1,1,1),
                                    figure=self.figure)
         self.update_bonds = self.bonds.mlab_source.trait_set
         

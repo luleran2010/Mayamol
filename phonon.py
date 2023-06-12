@@ -101,7 +101,7 @@ class DisplacementVisualizer(HasTraits):
 
     @observe('play')
     def on_play_clicked(self, event=None):
-        if self.disps is None:
+        if np.all(self.disps == 0):
             return
         if self.animator is None:
             self.animator = self.animate()
